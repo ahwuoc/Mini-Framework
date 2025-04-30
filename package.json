@@ -1,6 +1,5 @@
 {
   "name": "other",
-  "module": "index.ts",
   "type": "module",
   "private": true,
   "devDependencies": {
@@ -11,7 +10,10 @@
   },
   "dependencies": {
     "@types/express": "^5.0.1",
+    "@types/react-dom": "^19.1.2",
     "express": "^5.1.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "reflect-metadata": "^0.2.2"
   },
   "scripts": {

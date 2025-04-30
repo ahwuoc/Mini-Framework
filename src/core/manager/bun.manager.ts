@@ -1,6 +1,7 @@
 import { serve, type BodyInit } from "bun";
 import ResponseManager from "./response.manager";
-
+import HomePage from "../../test.html";
+import { POST } from "../decorator/method.decorator";
 export type Context = {
   req: Request;
   res: ResponseManager;
@@ -12,16 +13,16 @@ type Handler = (ctx: Context) => Response | Promise<Response>;
 type Method = "POST" | "GET" | "PUT" | "PATCH" | "DELETE";
 interface RouteEntry {
   method: Method;
-  path: string; // "/users/:id"
-  pattern: RegExp; // regex: /^\/users\/([^/]+)$/
-  paramNames: string[]; // ["id"]
+  path: string;
+  pattern: RegExp;
+  paramNames: string[];
   handler: Handler;
 }
 
 export default class App {
   private routes: RouteEntry[] = [];
   private hooks: Hook[] = [];
-
+  private static response: ResponseManager = new ResponseManager();
   private async parseBody(req: Request): Promise<unknown> {
     const contentType = req.headers.get("Content-Type")?.toLowerCase();
     if (!contentType) return null;
@@ -40,7 +41,7 @@ export default class App {
       if (result instanceof Response) return result;
     }
     const response = await handler(ctx);
-    return response ?? new Response("No response", { status: 500 });
+    return response ?? App.response.error("No Response", 500);
   }
 
   private pathToRegex(path: string): { pattern: RegExp; paramNames: string[] } {
@@ -62,30 +63,26 @@ export default class App {
         const found = this.routes.find(
           (r) => r.method === method && r.pattern.test(url.pathname),
         );
-        if (!found) return new Response("Not found", { status: 404 });
 
+        if (!found) return App.response.error("Not Found", 404);
         const match = url.pathname.match(found.pattern);
         const params: Record<string, string> = {};
         if (match) {
           found.paramNames.forEach((name, i) => {
-            // params[name] = match[i + 1];
             const value = match[i + 1];
-            if (value === undefined) {
-              return new Response("Missing param", { status: 400 });
-            }
+            if (value === undefined)
+              return App.response.error("Missing param", 400);
             params[name] = value;
           });
         }
-
         const body = await this.parseBody(req);
-        const res = new ResponseManager();
+
         const ctx: Context = {
           req,
-          res,
+          res: App.response,
           body,
           params,
         };
-
         return await this.applyMiddleware(ctx, found.handler);
       },
     };
@@ -93,6 +90,7 @@ export default class App {
 
   public listen(port: number, callback?: () => void): void {
     const server = serve({
+      development: true,
       port,
       ...this.handlerFetch(),
     });
