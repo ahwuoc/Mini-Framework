@@ -19,7 +19,7 @@ interface RouteEntry {
   handler: Handler;
 }
 
-export default class App {
+export default class MiniFw {
   private routes: RouteEntry[] = [];
   private hooks: Hook[] = [];
   private static response: ResponseManager = new ResponseManager();
@@ -41,7 +41,7 @@ export default class App {
       if (result instanceof Response) return result;
     }
     const response = await handler(ctx);
-    return response ?? App.response.error("No Response", 500);
+    return response ?? MiniFw.response.error("No Response", 500);
   }
 
   private pathToRegex(path: string): { pattern: RegExp; paramNames: string[] } {
@@ -64,14 +64,14 @@ export default class App {
           (r) => r.method === method && r.pattern.test(url.pathname),
         );
 
-        if (!found) return App.response.error("Not Found", 404);
+        if (!found) return MiniFw.response.error("Not Found", 404);
         const match = url.pathname.match(found.pattern);
         const params: Record<string, string> = {};
         if (match) {
           found.paramNames.forEach((name, i) => {
             const value = match[i + 1];
             if (value === undefined)
-              return App.response.error("Missing param", 400);
+              return MiniFw.response.error("Missing param", 400);
             params[name] = value;
           });
         }
@@ -79,7 +79,7 @@ export default class App {
 
         const ctx: Context = {
           req,
-          res: App.response,
+          res: MiniFw.response,
           body,
           params,
         };

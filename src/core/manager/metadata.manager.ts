@@ -13,12 +13,12 @@ type MetadataKey = "method_metadata" | "param_metadata" | "class_metadata";
  */
 export const setMetadata = (
   key: MetadataKey,
-  value: any
+  value: any,
 ): ClassDecorator & MethodDecorator & ParameterDecorator => {
   return (
     target: any,
     propertyKey?: string | symbol,
-    descriptorOrIndex?: PropertyDescriptor | number
+    descriptorOrIndex?: PropertyDescriptor | number,
   ) => {
     if (typeof descriptorOrIndex === "number") {
       // --- Đây là PARAMETER DECORATOR ---

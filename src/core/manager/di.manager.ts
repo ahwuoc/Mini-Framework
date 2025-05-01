@@ -1,5 +1,4 @@
-import type { Constructor } from "./common/types";
-
+import type { Constructor } from "../common/types";
 export default class ContainerDI {
   private static services = new Map<Constructor<any>, Constructor<any>>();
   private static instances = new Map<Constructor<any>, any>();

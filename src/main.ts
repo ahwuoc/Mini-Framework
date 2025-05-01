@@ -1,9 +1,4 @@
-import "reflect-metadata";
-import App from "./core/manager/bun.manager";
+import ManagerApp from "./core/manager/app.manager";
 
-const app = new App();
-
-app.get("/", (ctx) => {
-  return ctx.res.ok("data");
-});
+const app = new ManagerApp();
 app.listen(3000);

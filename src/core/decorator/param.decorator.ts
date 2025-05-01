@@ -1,5 +1,1 @@
-export const Body = (): ParameterDecorator => {
-    return () => {
-        
-    }
-};
+import { setMetadata } from "../manager/metadata.manager";

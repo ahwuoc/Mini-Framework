@@ -36,7 +36,7 @@ export default class ResponseManager {
     Component: ComponentType<any>,
     props: Record<string, any> = {},
   ) {
-    const element = createElement(Component, props); // tạo JSX từ Component + props
+    const element = createElement(Component, props);
     const stream = await renderToReadableStream(element);
     return new Response(stream, {
       headers: { "Content-Type": "text/html; charset=utf-8" },
