@@ -36,7 +36,7 @@ export default class ContainerDI {
       return this.getService(param);
     });
 
-    dependencies = dependencies.map((dep, index) => {
+    dependencies = dependencies.map((dep: unknown, index: number) => {
       const shouldReplace = Reflect.getMetadata(index, service);
       if (shouldReplace) {
         try {
@@ -57,10 +57,8 @@ export default class ContainerDI {
     const methods = Object.getOwnPropertyNames(service.prototype).filter(
       (method) => !defaultMethods.includes(method),
     );
-
     for (const method of methods) {
       if (typeof service.prototype[method] !== "function") continue;
-
       const originalMethod = service.prototype[method];
       const paramTypes =
         Reflect.getMetadata("design:paramtypes", service.prototype, method) ??
