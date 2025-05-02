@@ -36,11 +36,21 @@ export default class ResponseManager {
     Component: ComponentType<any>,
     props: Record<string, any> = {},
   ) {
-    const element = createElement(Component, props);
-    const stream = await renderToReadableStream(element);
-    return new Response(stream, {
-      headers: { "Content-Type": "text/html; charset=utf-8" },
-    });
+    try {
+      if (!Component || typeof Component !== "function") {
+        throw new Error("Invalid Component provided to render");
+      }
+      const element = createElement(Component, props);
+      const stream = await renderToReadableStream(element);
+      return new Response(stream, {
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      });
+    } catch (error) {
+      console.error("Error rendering component:", error);
+      return new Response("An error occurred during rendering.", {
+        status: 500,
+      });
+    }
   }
 
   public redirect(url: string, status = 302) {

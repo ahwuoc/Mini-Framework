@@ -3,15 +3,12 @@ import { join, resolve } from "path";
 const dynamicImport = (folder: string) => {
   const allModule: any[] = [];
   const dir = join(process.cwd(), "src", folder);
-
   if (!existsSync(dir)) {
     return console.warn(`Folder hiện tại không tồn tại: ${dir}`);
   }
-
   const files = readdirSync(dir).filter(
-    (file) => file.endsWith(".ts") || file.endsWith(".js")
+    (file) => file.endsWith(".ts") || file.endsWith(".js"),
   );
-
   for (const file of files) {
     const filePath = resolve(dir, file);
 

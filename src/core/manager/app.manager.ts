@@ -1,11 +1,10 @@
 import "reflect-metadata";
-import type { Constructor } from "../common/types";
-import { GET } from "../decorator/method.decorator";
+import type { Constructor } from "../utils/types";
 import dynamicImport from "../dynamic/loadController";
 import ContainerDI from "./di.manager";
 import MiniFw from "./mini-fw.manager";
-import { getMetadata } from "reflect-metadata/no-conflict";
 import type { Context } from "./mini-fw.manager";
+import { colorize, colorizePath, combinePath } from "../utils/common";
 export type TAppManager = {
   controllers?: Constructor<any>[];
 };
@@ -22,7 +21,6 @@ export default class ManagerApp {
     this.RouteRegister();
     this.App.listen(port);
   }
-
   private registerInstance() {
     this.controllers.map((controller) => {
       const instance = this.RegisterDI(controller);
@@ -36,7 +34,6 @@ export default class ManagerApp {
   private RouteRegister() {
     for (const controller of this.controllers) {
       const instance = ContainerDI.getService(controller);
-      console.log(instance);
       const controllerMeta = Reflect.getMetadata("class_metadata", controller);
       const prefix = controllerMeta?.prefix || "";
       const methods = Object.getOwnPropertyNames(controller.prototype).filter(
@@ -49,21 +46,16 @@ export default class ManagerApp {
           methodName,
         );
         if (!methodMeta) continue;
-        const routeHandler = instance[methodName].bind(instance);
-        const fullPath = this.combinePath(prefix, methodMeta.router);
-        console.log(fullPath);
+        const routeHandler = (instance as any)[methodName].bind(instance);
+        const fullPath = combinePath(prefix, methodMeta.router);
         (this.App as any)[methodMeta.method.toLowerCase()](
           fullPath,
           (ctx: Context) => routeHandler(ctx),
         );
+        console.log(
+          `🍞 ${colorize(methodMeta.method)} ${colorizePath(fullPath)} → ${controller.name}.${methodName}()`,
+        );
       }
     }
-  }
-
-  private combinePath(...args: string[]): string {
-    return `/${args
-      .filter((path) => path !== "" && path !== "/")
-      .map((path) => path.replace(/^\/+|\/+$/g, ""))
-      .join("/")}`;
   }
 }

@@ -1,8 +1,8 @@
 import { setMetadata } from "../manager/metadata.manager";
-import type { Method } from "../common/types";
+import type { Method } from "../utils/types";
 export const initMethod = (
   method: Method,
-  path: string = ""
+  path: string = "",
 ): MethodDecorator =>
   setMetadata("method_metadata", {
     method: method,

@@ -1,7 +1,5 @@
 import { serve, type BodyInit } from "bun";
 import ResponseManager from "./response.manager";
-import HomePage from "../../test.html";
-import { POST } from "../decorator/method.decorator";
 export type Context = {
   req: Request;
   res: ResponseManager;
@@ -32,6 +30,20 @@ export default class MiniFw {
       return null;
     } catch (error) {
       return { error: "Invalid body format" };
+    }
+  }
+  public listen(port: number, callback?: () => void): void {
+    const server = serve({
+      development: true,
+      port,
+      ...this.handlerFetch(),
+    });
+    if (!callback) {
+      console.log(
+        `🔥 Server chạy tại http://${server.hostname}:${server.port}`,
+      );
+    } else {
+      callback();
     }
   }
 
@@ -86,21 +98,6 @@ export default class MiniFw {
         return await this.applyMiddleware(ctx, found.handler);
       },
     };
-  }
-
-  public listen(port: number, callback?: () => void): void {
-    const server = serve({
-      development: true,
-      port,
-      ...this.handlerFetch(),
-    });
-    if (!callback) {
-      console.log(
-        `🔥 Server chạy tại http://${server.hostname}:${server.port}`,
-      );
-    } else {
-      callback();
-    }
   }
 
   public onRequest(hook: Hook) {
