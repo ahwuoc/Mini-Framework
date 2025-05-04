@@ -21,17 +21,14 @@ export default class RateLimitManager {
   public check(ip: string): boolean {
     const now = Date.now();
     const record = this.store.get(ip);
-
     if (!record || now > record.resetTime) {
       this.store.set(ip, { count: 1, resetTime: now + this.windowsMS });
       return true;
     }
-
     if (record.count < this.max) {
       record.count++;
       return true;
     }
-
     return false;
   }
 }

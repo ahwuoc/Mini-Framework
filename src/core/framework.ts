@@ -15,8 +15,7 @@ export default class Zolid {
   }
 
   public listen(port: number, callback?: () => void) {
-    this.appManager.init();
-    this.app.listen(port, callback);
+    this.appManager.listen(port, callback);
   }
 
   public get(path: validPath, handler: Handler) {

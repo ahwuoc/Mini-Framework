@@ -3,21 +3,22 @@ import ContainerDI from "./container";
 import { colorize, colorizePath, combinePath } from "../utils/formatting";
 import type { Constructor } from "../utils/type-definitions";
 import module_loader from "../utils/module-loader";
-import MiniFw from "./server";
+import CoreApp from "./server";
 export type TAppManager = {
   controllers?: Constructor<any>[];
 };
 
 export default class ManagerApp {
   private controllers: Constructor<any>[];
-  private App: MiniFw;
-  constructor(App: MiniFw) {
+  private App: CoreApp;
+  constructor(App: CoreApp) {
     this.App = App;
     this.controllers = module_loader("controllers") ?? [];
   }
-  public init() {
+  public listen(port: any, callback?: any) {
     this.registerInstance();
     this.RouteRegister();
+    this.App.listen(port, callback);
   }
   private registerInstance() {
     this.controllers.map((controller) => {
