@@ -1,6 +1,5 @@
 import "reflect-metadata";
-
-type MetadataKey = "method_metadata" | "param_metadata" | "class_metadata";
+import type { MetadataKey } from "../utils/type-definitions";
 
 export const setMetadata = (
   key: MetadataKey,

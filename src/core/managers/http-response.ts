@@ -1,31 +1,25 @@
 import type { BodyInit, HeadersInit } from "bun";
-import {
-  createElement,
-  type Component,
-  type ComponentType,
-  type ReactElement,
-} from "react";
+import { createElement, type ComponentType } from "react";
 import { renderToReadableStream } from "react-dom/server";
 export default class ResponseManager {
-  private defaultHeaders = { "Content-Type": "application/json" };
-
-  constructor(private init?: ResponseInit) {}
-
-  public text(text: string, status = 200, extraHeaders: HeadersInit = {}) {
-    return this.createResponse(text, status, {
-      "Content-Type": "text/plain",
-      ...extraHeaders,
+  public text(text: string, status = 200) {
+    return new Response(text, {
+      status: status,
+      headers: {
+        "Content-Type": "text/plain",
+      },
     });
   }
-
-  public json(data: unknown, status = 200, extraHeaders: HeadersInit = {}) {
-    return this.createResponse(JSON.stringify(data), status, {
-      ...extraHeaders,
+  public json(data: unknown, status = 200) {
+    return new Response(JSON.stringify(data), {
+      status: status,
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
   }
-
-  public ok(data: unknown, extraHeaders: HeadersInit = {}) {
-    return this.json(data, 200, extraHeaders);
+  public ok(data: unknown) {
+    return this.json(data, 200);
   }
 
   public error(msg = "Something went wrong", status = 500) {
@@ -34,7 +28,7 @@ export default class ResponseManager {
 
   public async render(
     Component: ComponentType<any>,
-    props: Record<string, any> = {},
+    props: Record<string, any> = {}
   ) {
     try {
       if (!Component || typeof Component !== "function") {
@@ -52,7 +46,6 @@ export default class ResponseManager {
       });
     }
   }
-
   public redirect(url: string, status = 302) {
     return new Response(null, {
       status,
@@ -62,16 +55,5 @@ export default class ResponseManager {
 
   public noContent() {
     return new Response(null, { status: 204 });
-  }
-
-  private createResponse(
-    body: BodyInit,
-    status: number,
-    headers: HeadersInit = {},
-  ) {
-    return new Response(body, {
-      status,
-      headers: { ...this.defaultHeaders, ...headers },
-    });
   }
 }

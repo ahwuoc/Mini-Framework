@@ -1,5 +1,6 @@
-import { setMetadata } from "../manager/metadata.manager";
-import type { Method } from "../utils/types";
+import { setMetadata } from "../managers/reflection";
+import type { Method } from "../utils/type-definitions";
+
 export const initMethod = (
   method: Method,
   path: string = "",

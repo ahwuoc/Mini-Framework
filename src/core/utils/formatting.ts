@@ -5,6 +5,10 @@ export function combinePath(...args: string[]): string {
     .join("/")}`;
 }
 
+export function normalizePath(path: string) {
+  return path.startsWith("/") ? path : `/${path}`;
+}
+
 export function colorize(method: string) {
   const colors: Record<string, string> = {
     GET: "\x1b[32m", // green

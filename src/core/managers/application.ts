@@ -1,10 +1,9 @@
 import "reflect-metadata";
-import type { Constructor } from "../utils/types";
-import dynamicImport from "../dynamic/loadController";
-import ContainerDI from "./di.manager";
-import MiniFw from "./mini-fw.manager";
-import type { Context } from "./mini-fw.manager";
-import { colorize, colorizePath, combinePath } from "../utils/common";
+import ContainerDI from "./container";
+import { colorize, colorizePath, combinePath } from "../utils/formatting";
+import type { Constructor } from "../utils/type-definitions";
+import module_loader from "../utils/module-loader";
+import MiniFw from "./server";
 export type TAppManager = {
   controllers?: Constructor<any>[];
 };
@@ -12,21 +11,19 @@ export type TAppManager = {
 export default class ManagerApp {
   private controllers: Constructor<any>[];
   private App: MiniFw;
-  constructor() {
-    this.App = new MiniFw();
-    this.controllers = dynamicImport("controllers") ?? [];
+  constructor(App: MiniFw) {
+    this.App = App;
+    this.controllers = module_loader("controllers") ?? [];
   }
-  listen(port: number) {
+  public init() {
     this.registerInstance();
     this.RouteRegister();
-    this.App.listen(port);
   }
   private registerInstance() {
     this.controllers.map((controller) => {
       const instance = this.RegisterDI(controller);
     });
   }
-
   private RegisterDI(constructor: Constructor<any>) {
     ContainerDI.registerService(constructor);
     return ContainerDI.getService(constructor);
@@ -50,10 +47,12 @@ export default class ManagerApp {
         const fullPath = combinePath(prefix, methodMeta.router);
         (this.App as any)[methodMeta.method.toLowerCase()](
           fullPath,
-          (ctx: Context) => routeHandler(ctx),
+          (ctx: unknown) => routeHandler(ctx),
         );
         console.log(
-          `🍞 ${colorize(methodMeta.method)} ${colorizePath(fullPath)} → ${controller.name}.${methodName}()`,
+          `🍞 ${colorize(methodMeta.method)} ${colorizePath(fullPath)} → ${
+            controller.name
+          }.${methodName}()`,
         );
       }
     }

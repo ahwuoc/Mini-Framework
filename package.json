@@ -1,7 +1,29 @@
 {
-  "name": "other",
+  "name": "zolis",
+  "typings": "src/core/zolis.d.ts",
+  "version": "1.0.2",
+  "description": "A lightweight TypeScript framework with dependency injection",
   "type": "module",
-  "private": true,
+  "private": false,
+  "main": "dist/index.js",
+  "types": "src/core/zolis.d.ts",
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/username/zolis.git"
+  },
+  "keywords": [
+    "framework",
+    "typescript",
+    "dependency-injection",
+    "bun",
+    "decorators"
+  ],
+  "bugs": {
+    "url": "https://github.com/username/zolis/issues"
+  },
+  "homepage": "https://github.com/username/zolis#readme",
   "devDependencies": {
     "@types/bun": "latest"
   },
@@ -9,17 +31,15 @@
     "typescript": "^5"
   },
   "dependencies": {
-    "@types/express": "^5.0.1",
-    "@types/react-dom": "^19.1.2",
-    "bun-plugin-tailwind": "^0.0.15",
-    "express": "^5.1.0",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-router-dom": "^7.5.3",
-    "reflect-metadata": "^0.2.2",
-    "tailwindcss": "^4.1.5"
+    "@types/react-dom": "^18.2.19",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "reflect-metadata": "^0.2.2"
   },
   "scripts": {
-    "dev": "bun --hot run src/main.ts"
+    "dev": "bun --hot run src/index.ts",
+    "build": "bun build ./src/index.ts --outdir ./dist",
+    "prepublishOnly": "bun run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
   }
 }

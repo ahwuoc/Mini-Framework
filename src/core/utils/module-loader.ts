@@ -1,10 +1,10 @@
 import { readdirSync, existsSync } from "fs";
 import { join, resolve } from "path";
-const dynamicImport = (folder: string) => {
+const module_loader = (folder: string) => {
   const allModule: any[] = [];
   const dir = join(process.cwd(), "src", folder);
   if (!existsSync(dir)) {
-    return console.warn(`Folder hiện tại không tồn tại: ${dir}`);
+    return allModule;
   }
   const files = readdirSync(dir).filter(
     (file) => file.endsWith(".ts") || file.endsWith(".js"),
@@ -17,9 +17,9 @@ const dynamicImport = (folder: string) => {
       const mod = module.default || module;
       allModule.push(mod);
     } catch (error) {
-      console.error(`❌ Lỗi import ${filePath}:`, error);
+      console.error(`❌ Error importing ${filePath}:`, error);
     }
   }
   return allModule;
 };
-export default dynamicImport;
+export default module_loader;
