@@ -1,9 +1,8 @@
 import type { Handler, validPath } from "./utils/type-definitions";
 import ManagerApp from "./managers/application";
-import CoreApp from "./managers/server";
+import CoreApp, { type ExtendedRateLimitConfig } from "./managers/server";
 
-type TRateLimitConfig = { windowsMS: number; maxReq: number; message: string };
-type TConfig = { RateConfig?: TRateLimitConfig };
+type TConfig = { RateConfig?: ExtendedRateLimitConfig };
 
 export default class Zolid {
   private appManager: ManagerApp;

@@ -1,18 +1,20 @@
 import type { Context, Handler, Hook, Method } from "../utils/type-definitions";
-import RateLimitManager from "./throttler";
+import RateLimitManager, { type RateLimitConfig } from "./throttler";
 import ResponseManager from "./http-response";
 import { Router } from "./route-registry";
 import MiddlewareManager, { type ErrorHook } from "./pipeline";
 
-type TRateLimitConfig = { windowsMS: number; maxReq: number; message: string };
-type TConfig = { RateConfig?: TRateLimitConfig };
+export type ExtendedRateLimitConfig = RateLimitConfig & {
+  message?: string;
+};
+type TConfig = { RateConfig?: ExtendedRateLimitConfig };
 
 export default class CoreApp {
   private router: Router;
   private response: ResponseManager;
   private middleware: MiddlewareManager;
   private ratelimit: RateLimitManager;
-  private rateConfig?: TRateLimitConfig;
+  private rateConfig?: ExtendedRateLimitConfig;
 
   constructor(config?: TConfig) {
     this.router = new Router();
@@ -47,33 +49,31 @@ export default class CoreApp {
       );
   }
 
-  private handlerRate(req: Request): Response | undefined {
+  private async handlerRate(req: Request) {
     const ip =
       req.headers.get("x-forwarded-for") ||
       req.headers.get("cf-connecting-ip") ||
       req.headers.get("x-real-ip") ||
       "unknown";
-    const allowed = this.ratelimit.check(ip);
+    const allowed = await this.ratelimit.check(ip);
     if (!allowed) {
       return this.response.error(
-        this.rateConfig?.message ?? "Too many requests",
+        this.rateConfig?.message ?? "Too many requests, chill bro!",
         429,
       );
     }
+    return undefined;
   }
 
   private handlerFetch() {
     return {
       fetch: async (req: Request) => {
-        const rateResponse = this.handlerRate(req);
+        const rateResponse = await this.handlerRate(req);
         if (rateResponse) return rateResponse;
-
         const url = new URL(req.url);
         const method = req.method.toUpperCase() as Method;
         const route = this.router.findRoute(method, url.pathname);
-
         if (!route) return this.response.error("Not Found", 404);
-
         const match = url.pathname.match(route.pattern);
         const params: Record<string, string> = {};
         if (match) {
@@ -82,7 +82,6 @@ export default class CoreApp {
             if (value !== undefined) params[name] = value;
           });
         }
-
         const body = await this.parseBody(req);
         const ctx: Context = { req, res: this.response, body, params };
         return await this.middleware.applyHooks(ctx, route.handler);
