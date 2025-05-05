@@ -5,16 +5,10 @@ type RateRecord = {
   resetTime: number;
 };
 
-type RedisConfig = {
-  host: string;
-  port: number;
-  password?: string;
-};
-
 export type RateLimitConfig = {
   windowMs: number;
   maxRequests: number;
-  redisConfig?: RedisConfig;
+  redis?: Redis;
 };
 
 export default class RateLimitManager {
@@ -22,26 +16,10 @@ export default class RateLimitManager {
   private maxRequests: number;
   private windowMs: number;
   private redis?: Redis;
-
   constructor(config: RateLimitConfig = { windowMs: 60_000, maxRequests: 60 }) {
     this.maxRequests = config.maxRequests ?? 60;
     this.windowMs = config.windowMs ?? 60_000;
-
-    if (config.redisConfig) {
-      this.redis = new Redis({
-        host: config.redisConfig.host || "localhost",
-        port: config.redisConfig.port || 6379,
-        password: config.redisConfig.password,
-        lazyConnect: true,
-        retryStrategy: (times: number) => Math.min(times * 50, 2000),
-      });
-      this.redis.on("connect", () =>
-        console.log("Redis connected, ready to rate-limit like a boss! 😎"),
-      );
-      this.redis.on("error", (err: unknown) =>
-        console.error("Redis error, check your config!", err),
-      );
-    }
+    this.redis = config.redis;
   }
   public async getRateRecord(ip: string): Promise<RateRecord | null> {
     if (this.redis) {
@@ -49,18 +27,16 @@ export default class RateLimitManager {
         const record = await this.redis.get(ip);
         return record ? JSON.parse(record) : null;
       } catch (err) {
-        console.error("Redis get failed, falling back to Map!", err);
         return this.store.get(ip) ?? null;
       }
     }
-    return this.store.get(ip) ?? null; // Fallback to Map
+    return this.store.get(ip) ?? null;
   }
   public async setRateRecord(ip: string, record: RateRecord): Promise<void> {
     if (this.redis) {
       try {
         await this.redis.set(ip, JSON.stringify(record), "PX", this.windowMs); // PX = expire in ms
       } catch (err) {
-        console.error("Redis set failed, using Map instead!", err);
         this.store.set(ip, record);
       }
     } else {
@@ -81,11 +57,5 @@ export default class RateLimitManager {
       return true;
     }
     return false;
-  }
-  public async disconnect(): Promise<void> {
-    if (this.redis) {
-      await this.redis.quit();
-      console.log("Redis disconnected, see ya! 👋");
-    }
   }
 }

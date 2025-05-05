@@ -1,14 +1,14 @@
+import Redis from "ioredis";
 import Zolid from "./core/framework";
-
+const redis = new Redis({
+  host: "localhost",
+  port: 6379,
+});
 const app = new Zolid({
   RateConfig: {
     maxRequests: 1,
     windowMs: 10000,
     message: "Giới hạn request rồi bạn ơi",
-    redisConfig: {
-      host: "localhost",
-      port: 6379,
-    },
   },
 });
 app.get("/", () => {
